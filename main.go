@@ -5,21 +5,32 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	input "github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/muesli/termenv"
 
 	"github.com/Beartime234/babble"
 )
 
-const usage = `kboard [number]
+const usage = `kboard [number] [time]
 
 number: the number of words to generate. Must be a non-zero positive integer.
+        defaults to 1 word.
+time:   the number of seconds that the game will last.
+        If none is passed, tha game finishes after the first word.
 
-Example: kboard 2`
+Examples:
+ - kboard 2
+ - kboard -t 30`
+
+var term = termenv.ColorProfile()
 
 func main() {
-	if len(os.Args) != 2 {
+	if len(os.Args) < 2 || len(os.Args) > 3 {
 		fmt.Println(usage)
 		os.Exit(1)
 	}
@@ -40,7 +51,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	p := tea.NewProgram(initialModel(numOfWords))
+	var duration int
+	if len(os.Args) == 3 {
+		duration, err = strconv.Atoi(os.Args[2])
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(2)
+		}
+
+		if duration < 1 {
+			fmt.Println(usage)
+			os.Exit(1)
+		}
+	}
+
+	p := tea.NewProgram(initialModel(numOfWords, duration))
 
 	if err := p.Start(); err != nil {
 		log.Fatal(err)
@@ -50,60 +75,153 @@ func main() {
 type model struct {
 	babbler     babble.Babbler
 	textInput   input.Model
+	spinner     spinner.Model
 	currentWord string
+	status      string
+	ticker      *time.Ticker
+	startTime   time.Time
+	duration    time.Duration
+	timeLeft    time.Duration
+	points      int
+	done        bool
+	timeMode    bool
 }
 
-func initialModel(numOfWords int) model {
-	inputModel := input.NewModel()
-	babbler := babble.NewBabbler()
-	babbler.Separator = " "
-	babbler.Count = numOfWords
-	inputModel.Placeholder = "Type the word above and press Enter 👆🏽"
-	inputModel.Focus()
+func initialModel(numOfWords, duration int) model {
+	b := babble.NewBabbler()
+	b.Separator = " "
+	b.Count = numOfWords
+
+	i := input.NewModel()
+	i.Placeholder = "Type the word above and press Enter 👆🏽"
+	i.Focus()
+
+	s := spinner.NewModel()
+	s.Frames = spinner.Dot
+
+	d := time.Duration(duration) * time.Second
+	timeMode := duration > 0
 
 	return model{
-		babbler:     babbler,
-		currentWord: babbler.Babble(),
-		textInput:   inputModel,
+		babbler:     b,
+		currentWord: b.Babble(),
+		textInput:   i,
+		spinner:     s,
+		startTime:   time.Now(),
+		duration:    d,
+		timeLeft:    d,
+		timeMode:    timeMode,
 	}
 }
 
 func (m model) Init() tea.Cmd {
-	return input.Blink(m.textInput)
+	cmds := []tea.Cmd{
+		CountDown(),
+		input.Blink(m.textInput),
+		spinner.Tick(m.spinner),
+	}
+
+	return tea.Batch(cmds...)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case CountdownMsg:
+		if !m.timeMode {
+			return m, nil
+		}
+		currentTime := msg.Time
+		timeConsumed := currentTime.Sub(m.startTime)
+		if timeConsumed < m.duration {
+			m.timeLeft = m.duration - timeConsumed
+			return m, CountDown()
+		} else {
+			m.done = true
+			return m, nil
+		}
+
+	case NewWordMsg:
+		m.currentWord = m.babbler.Babble()
+		m.textInput.Reset()
+		m.textInput.Focus()
+		return m, nil
+
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEsc, tea.KeyCtrlC:
 			return m, tea.Quit
 		case tea.KeyEnter:
 			if m.textInput.Value() == m.currentWord {
-				result := fmt.Sprintf("%s\n🎉 correct!", m.textInput.Value())
-				m.textInput.SetValue(result)
-				m.textInput.Blur()
+				m.status = "🎉 correct!"
+				m.points += 1
 			} else {
-				result := fmt.Sprintf("%s\n😭 nope", m.textInput.Value())
-				m.textInput.SetValue(result)
-				m.textInput.Blur()
+				m.status = "😭 nope"
 			}
-			return m, tea.Quit
+			if !m.timeMode {
+				return m, tea.Quit
+			}
+			return m, NewWord()
 		}
-
 	}
 
 	m.textInput, cmd = input.Update(msg, m.textInput)
+	m.spinner, cmd = spinner.Update(msg, m.spinner)
 	return m, cmd
 }
 
 func (m model) View() string {
-	return fmt.Sprintf(
-		"%s\n\n\n%s\n\n%s",
+	quitMsg := "(esc or ctrl-c to quit)"
+	if m.done {
+		return fmt.Sprintf("⏰ time is up! you had %d good answers\n%s", m.points, quitMsg)
+	}
+
+	s := termenv.
+		String(spinner.View(m.spinner)).
+		Foreground(term.Color("205")).
+		String()
+
+	timerText := fmt.Sprintf("%d seconds remaining\n%d points\n",
+		int(m.timeLeft.Seconds()),
+		m.points,
+	)
+
+	output := fmt.Sprintf(
+		"%s\n%s\n%s\n\n%s",
+		m.status,
 		m.currentWord,
 		input.View(m.textInput),
-		"(esc or ctrl-c to quit)",
-	) + "\n"
+		quitMsg,
+	)
+
+	if m.timeMode {
+		return fmt.Sprintf("%s %s\n%s\n",
+			s,
+			timerText,
+			output,
+		)
+	}
+
+	return fmt.Sprintf("%s%s\n", s, output)
+}
+
+type NewWordMsg struct{}
+
+type CountdownMsg struct {
+	Time time.Time
+}
+
+func NewWord() tea.Cmd {
+	return func() tea.Msg {
+		return NewWordMsg{}
+	}
+}
+
+func CountDown() tea.Cmd {
+	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+		return CountdownMsg{
+			Time: t,
+		}
+	})
 }
