@@ -9,7 +9,7 @@ import (
 	input "github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/tjarratt/babble"
+	"github.com/Beartime234/babble"
 )
 
 const usage = `kboard [number]
