@@ -4,7 +4,13 @@
 # kboard
 Terminal game to practice keyboard typing. Built with [bubbletea](https://github.com/charmbracelet/bubbletea)
 
+### Install
+```bash
+go get github.com/CamiloGarciaLaRotta/kboard
+```
+
 ### How to use
+
 ```bash
 kboard [number] [time]
 
@@ -24,4 +30,3 @@ Examples:
 
 ### Timed mode
 ![timed demo](https://user-images.githubusercontent.com/17187770/97120698-5ee51b80-16ef-11eb-9adf-c134340a72ff.gif)
-
