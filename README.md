@@ -1,3 +1,6 @@
+![noun_Keyboard_3563522](https://user-images.githubusercontent.com/17187770/97167613-7d81fb80-175d-11eb-9f0c-2c335d666d85.png)
+
+
 # kboard
 Terminal game to practice keyboard typing. Built with [bubbletea](https://github.com/charmbracelet/bubbletea)
 
