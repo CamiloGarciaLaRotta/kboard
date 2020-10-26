@@ -25,7 +25,7 @@ time:   the number of seconds that the game will last.
 
 Examples:
  - kboard 2
- - kboard -t 30`
+ - kboard 1 30`
 
 var term = termenv.ColorProfile()
 
@@ -78,7 +78,6 @@ type model struct {
 	spinner     spinner.Model
 	currentWord string
 	status      string
-	ticker      *time.Ticker
 	startTime   time.Time
 	duration    time.Duration
 	timeLeft    time.Duration
@@ -100,7 +99,6 @@ func initialModel(numOfWords, duration int) model {
 	s.Frames = spinner.Dot
 
 	d := time.Duration(duration) * time.Second
-	timeMode := duration > 0
 
 	return model{
 		babbler:     b,
@@ -110,39 +108,59 @@ func initialModel(numOfWords, duration int) model {
 		startTime:   time.Now(),
 		duration:    d,
 		timeLeft:    d,
-		timeMode:    timeMode,
+		timeMode:    duration > 0,
 	}
+}
+
+type newWordMsg struct{}
+
+type countdownMsg struct {
+	time time.Time
+}
+
+func newWord() tea.Cmd {
+	return func() tea.Msg {
+		return newWordMsg{}
+	}
+}
+
+func countDown() tea.Cmd {
+	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+		return countdownMsg{
+			time: t,
+		}
+	})
 }
 
 func (m model) Init() tea.Cmd {
 	cmds := []tea.Cmd{
-		CountDown(),
 		input.Blink(m.textInput),
 		spinner.Tick(m.spinner),
+	}
+
+	if m.timeMode {
+		cmds = append(cmds, countDown())
 	}
 
 	return tea.Batch(cmds...)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
-	case CountdownMsg:
+	case countdownMsg:
 		if !m.timeMode {
 			return m, nil
 		}
-		currentTime := msg.Time
+		currentTime := msg.time
 		timeConsumed := currentTime.Sub(m.startTime)
 		if timeConsumed < m.duration {
 			m.timeLeft = m.duration - timeConsumed
-			return m, CountDown()
-		} else {
-			m.done = true
-			return m, nil
+			return m, countDown()
 		}
+		m.done = true
+		return m, nil
 
-	case NewWordMsg:
+	case newWordMsg:
 		m.currentWord = m.babbler.Babble()
 		m.textInput.Reset()
 		m.textInput.Focus()
@@ -155,17 +173,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyEnter:
 			if m.textInput.Value() == m.currentWord {
 				m.status = "🎉 correct!"
-				m.points += 1
+				m.points++
 			} else {
 				m.status = "😭 nope"
 			}
 			if !m.timeMode {
 				return m, tea.Quit
 			}
-			return m, NewWord()
+			return m, newWord()
 		}
 	}
 
+	// TODO I think these 2 should also be handled within a a message
+	var cmd tea.Cmd
 	m.textInput, cmd = input.Update(msg, m.textInput)
 	m.spinner, cmd = spinner.Update(msg, m.spinner)
 	return m, cmd
@@ -204,24 +224,4 @@ func (m model) View() string {
 	}
 
 	return fmt.Sprintf("%s%s\n", s, output)
-}
-
-type NewWordMsg struct{}
-
-type CountdownMsg struct {
-	Time time.Time
-}
-
-func NewWord() tea.Cmd {
-	return func() tea.Msg {
-		return NewWordMsg{}
-	}
-}
-
-func CountDown() tea.Cmd {
-	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
-		return CountdownMsg{
-			Time: t,
-		}
-	})
 }
