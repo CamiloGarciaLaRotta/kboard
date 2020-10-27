@@ -25,8 +25,8 @@ Examples:
  ```
 
 ### Untimed mode
-![untimed demo](https://user-images.githubusercontent.com/17187770/97121027-d9af3600-16f1-11eb-8d9a-22315ec5f798.gif)
-
+![untimed demo](https://user-images.githubusercontent.com/17187770/97325058-f611b680-1848-11eb-8b3b-d80660a8ded4.gif)
 
 ### Timed mode
-![timed demo](https://user-images.githubusercontent.com/17187770/97120698-5ee51b80-16ef-11eb-9adf-c134340a72ff.gif)
+![timed demo](https://user-images.githubusercontent.com/17187770/97336421-5e669500-1855-11eb-8d4c-1683a771c0e6.gif)
+
