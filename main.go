@@ -92,7 +92,11 @@ func initialModel(numOfWords, duration int) model {
 	b.Count = numOfWords
 
 	i := input.NewModel()
-	i.Placeholder = "Type the word above and press Enter 👆🏽"
+	if numOfWords == 1 {
+		i.Placeholder = "Type the word above and press Space or Enter 👆"
+	} else {
+		i.Placeholder = "Type the word above and press Enter 👆"
+	}
 	i.Focus()
 
 	s := spinner.NewModel()
@@ -146,6 +150,10 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var spinnerCmd tea.Cmd
+	m.spinner, spinnerCmd = spinner.Update(msg, m.spinner)
+	cmds := []tea.Cmd{spinnerCmd}
+
 	switch msg := msg.(type) {
 	case countdownMsg:
 		if !m.timeMode {
@@ -167,34 +175,41 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyEsc, tea.KeyCtrlC:
+		switch msg.String() {
+		case "esc", "ctrl+c":
 			return m, tea.Quit
-		case tea.KeyEnter:
-			if m.textInput.Value() == m.currentWord {
-				m.status = "🎉 correct!"
-				m.points++
-			} else {
-				m.status = "😭 nope"
+
+		case "enter":
+			return m.handleSubmission()
+
+		case " ":
+			if m.babbler.Count == 1 {
+				return m.handleSubmission()
 			}
-			if !m.timeMode {
-				return m, tea.Quit
-			}
-			return m, newWord()
+			fallthrough
+
+		default:
+			var inputCmd tea.Cmd
+			m.textInput, inputCmd = input.Update(msg, m.textInput)
+			cmds = append(cmds, inputCmd)
 		}
 	}
 
-	// TODO I think these 2 should also be handled within a a message
-	var cmd tea.Cmd
-	m.textInput, cmd = input.Update(msg, m.textInput)
-	m.spinner, cmd = spinner.Update(msg, m.spinner)
-	return m, cmd
+	return m, tea.Batch(cmds...)
 }
 
 func (m model) View() string {
 	quitMsg := "(esc or ctrl-c to quit)"
 	if m.done {
-		return fmt.Sprintf("⏰ time is up! you had %d good answers\n%s", m.points, quitMsg)
+		var pointMsg string
+		if m.points == 0 {
+			pointMsg = "no good answers"
+		} else if m.points == 1 {
+			pointMsg = "1 good answer"
+		} else {
+			pointMsg = fmt.Sprintf("%d good answers", m.points)
+		}
+		return fmt.Sprintf("⏰ time is up! you had %s\n%s", pointMsg, quitMsg)
 	}
 
 	s := termenv.
@@ -207,21 +222,25 @@ func (m model) View() string {
 		m.points,
 	)
 
-	output := fmt.Sprintf(
-		"%s\n%s\n%s\n\n%s",
-		m.status,
-		m.currentWord,
-		input.View(m.textInput),
-		quitMsg,
-	)
-
 	if m.timeMode {
-		return fmt.Sprintf("%s %s\n%s\n",
-			s,
-			timerText,
-			output,
-		)
+		timedOutput := fmt.Sprintf("%s%s\n  %s\n%s\n%s\n%s\n", s, timerText, m.currentWord, input.View(m.textInput), m.status, quitMsg)
+		return timedOutput
 	}
 
-	return fmt.Sprintf("%s%s\n", s, output)
+	nonTimedOutput := fmt.Sprintf("%s%s\n%s\n%s\n%s\n", s, m.currentWord, input.View(m.textInput), m.status, quitMsg)
+	return nonTimedOutput
+}
+
+func (m model) handleSubmission() (model, tea.Cmd) {
+	if m.textInput.Value() == m.currentWord {
+		m.status = "🎉 correct!"
+		m.points++
+	} else {
+		m.status = "😭 nope"
+	}
+	if !m.timeMode {
+		m.textInput.Blur()
+		return m, tea.Quit
+	}
+	return m, newWord()
 }
