@@ -1,0 +1,14 @@
+# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "gomod" 
+    directory: "/"
+    reviewers:
+      - "CamiloGarciaLaRotta"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "fix"
+    labels:
+      - "dependencies"
