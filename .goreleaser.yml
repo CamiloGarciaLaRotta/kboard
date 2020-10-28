@@ -27,6 +27,7 @@ changelog:
     exclude:
       - '^doc'
       - '^test'
+      - '^Merge'
 brews:
   - tap:
       owner: CamiloGarciaLaRotta
