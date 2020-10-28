@@ -25,6 +25,7 @@ changelog:
   sort: asc
   filters:
     exclude:
+      - '^config'
       - '^doc'
       - '^test'
       - '^Merge'
