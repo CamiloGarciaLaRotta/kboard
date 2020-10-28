@@ -5,8 +5,17 @@
 Terminal game to practice keyboard typing. Built with [bubbletea](https://github.com/charmbracelet/bubbletea)
 
 ### Install
+
+#### Golang
+
 ```bash
 go get github.com/CamiloGarciaLaRotta/kboard
+```
+
+#### Homebrew
+
+```
+brew install camilogarcialarotta/brews/kboard
 ```
 
 ### How to use
