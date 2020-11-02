@@ -2,8 +2,8 @@ github.com/Beartime234/babble v0.0.0-20200109202521-38f0c4feb5ef h1:c/6RtGknD3Uh
 github.com/Beartime234/babble v0.0.0-20200109202521-38f0c4feb5ef/go.mod h1:NDXZV9aU0jpXWAc3PpBgglQXPZUq0xRHfZ1THgfst+k=
 github.com/atotto/clipboard v0.1.2 h1:YZCtFu5Ie8qX2VmVTBnrqLSiU9XOWwqNRmdT3gIQzbY=
 github.com/atotto/clipboard v0.1.2/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
-github.com/charmbracelet/bubbles v0.7.1 h1:qvXoIh7ItTA+IA+IO2xxuI9ntp+uVprDAK+IoMzC5OI=
-github.com/charmbracelet/bubbles v0.7.1/go.mod h1:UV3dot0XR45cnQX2d8gtohfUFMepquRG2WE56LPKWNc=
+github.com/charmbracelet/bubbles v0.7.2 h1:2RYQ4TP2/R1AFG2SqDTPjCCJo08T+zRDyWcNOF+IyHI=
+github.com/charmbracelet/bubbles v0.7.2/go.mod h1:UV3dot0XR45cnQX2d8gtohfUFMepquRG2WE56LPKWNc=
 github.com/charmbracelet/bubbletea v0.12.1 h1:t21pkG2IDBRduPbt2J64Dx5yt8yIidAkXwhhrc11SzY=
 github.com/charmbracelet/bubbletea v0.12.1/go.mod h1:3gZkYELUOiEUOp0bTInkxguucy/xRbGSOcbMs1geLxg=
 github.com/containerd/console v1.0.1 h1:u7SFAJyRqWcG6ogaMAx3KjSTy1e3hT9QxqX7Jco7dRc=
