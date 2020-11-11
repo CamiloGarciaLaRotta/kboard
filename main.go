@@ -138,8 +138,8 @@ func countDown() tea.Cmd {
 
 func (m model) Init() tea.Cmd {
 	cmds := []tea.Cmd{
-		input.Blink(m.textInput),
-		spinner.Tick(m.spinner),
+		input.Blink,
+		spinner.Tick,
 	}
 
 	if m.timeMode {
@@ -151,7 +151,7 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var spinnerCmd tea.Cmd
-	m.spinner, spinnerCmd = spinner.Update(msg, m.spinner)
+	m.spinner, spinnerCmd = m.spinner.Update(msg)
 	cmds := []tea.Cmd{spinnerCmd}
 
 	switch msg := msg.(type) {
@@ -190,7 +190,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		default:
 			var inputCmd tea.Cmd
-			m.textInput, inputCmd = input.Update(msg, m.textInput)
+			m.textInput, inputCmd = m.textInput.Update(msg)
 			cmds = append(cmds, inputCmd)
 		}
 	}
@@ -213,7 +213,7 @@ func (m model) View() string {
 	}
 
 	s := termenv.
-		String(spinner.View(m.spinner)).
+		String(m.spinner.View()).
 		Foreground(term.Color("205")).
 		String()
 
@@ -223,11 +223,11 @@ func (m model) View() string {
 	)
 
 	if m.timeMode {
-		timedOutput := fmt.Sprintf("%s%s\n  %s\n%s\n%s\n%s\n", s, timerText, m.currentWord, input.View(m.textInput), m.status, quitMsg)
+		timedOutput := fmt.Sprintf("%s%s\n  %s\n%s\n%s\n%s\n", s, timerText, m.currentWord, m.textInput.View(), m.status, quitMsg)
 		return timedOutput
 	}
 
-	nonTimedOutput := fmt.Sprintf("%s%s\n%s\n%s\n%s\n", s, m.currentWord, input.View(m.textInput), m.status, quitMsg)
+	nonTimedOutput := fmt.Sprintf("%s%s\n%s\n%s\n%s\n", s, m.currentWord, m.textInput.View(), m.status, quitMsg)
 	return nonTimedOutput
 }
 
