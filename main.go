@@ -166,7 +166,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, countDown()
 		}
 		m.done = true
-		return m, nil
+		return m, tea.Quit
 
 	case newWordMsg:
 		m.currentWord = m.babbler.Babble()
