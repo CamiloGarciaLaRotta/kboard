@@ -100,7 +100,7 @@ func initialModel(numOfWords, duration int) model {
 	i.Focus()
 
 	s := spinner.NewModel()
-	s.Frames = spinner.Dot
+	s.Spinner = spinner.Dot
 
 	d := time.Duration(duration) * time.Second
 
