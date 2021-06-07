@@ -2,8 +2,8 @@ github.com/Beartime234/babble v0.0.0-20200109202521-38f0c4feb5ef h1:c/6RtGknD3Uh
 github.com/Beartime234/babble v0.0.0-20200109202521-38f0c4feb5ef/go.mod h1:NDXZV9aU0jpXWAc3PpBgglQXPZUq0xRHfZ1THgfst+k=
 github.com/atotto/clipboard v0.1.2 h1:YZCtFu5Ie8qX2VmVTBnrqLSiU9XOWwqNRmdT3gIQzbY=
 github.com/atotto/clipboard v0.1.2/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
-github.com/charmbracelet/bubbles v0.7.9 h1:VaXFgxebUf7i+vhDCT72msF+5C+rj4uUkjik6/zgWLU=
-github.com/charmbracelet/bubbles v0.7.9/go.mod h1:5WX1sSSjNCgCrzvRMN/z23HxvWaa+AI16Ch0KPZPeDs=
+github.com/charmbracelet/bubbles v0.8.0 h1:+l2op90Ag37Vn+30O1hbg/0wBl+e+sxHhgY1F/rvdHs=
+github.com/charmbracelet/bubbles v0.8.0/go.mod h1:5WX1sSSjNCgCrzvRMN/z23HxvWaa+AI16Ch0KPZPeDs=
 github.com/charmbracelet/bubbletea v0.13.1/go.mod h1:tp9tr9Dadh0PLhgiwchE5zZJXm5543JYjHG9oY+5qSg=
 github.com/charmbracelet/bubbletea v0.13.4 h1:IsUD1A9JQsmOkrWIsYhEG57voUc2rPwmomQyUwH2mkc=
 github.com/charmbracelet/bubbletea v0.13.4/go.mod h1:b5lOf5mLjMg1tRn1HVla54guZB+jvsyV0yYAQja95zE=
