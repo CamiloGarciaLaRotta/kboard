@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/Beartime234/babble v0.0.0-20200109202521-38f0c4feb5ef
-	github.com/charmbracelet/bubbles v0.14.0
+	github.com/charmbracelet/bubbles v0.15.0
 	github.com/charmbracelet/bubbletea v0.23.1
 	github.com/muesli/termenv v0.13.0
 	github.com/onsi/ginkgo v1.14.2 // indirect
